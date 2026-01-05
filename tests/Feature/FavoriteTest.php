@@ -159,4 +159,117 @@ class FavoriteTest extends TestCase
             'user_id' => $user->id,
         ]);
     }
+
+    public function test_favorites_index_returns_correct_json_structure()
+    {
+        $user = User::factory()->create();
+        $post = Post::factory()->create();
+        $userToFavorite = User::factory()->create();
+
+        $this->actingAs($user)
+            ->postJson(route('favorites.store', ['post' => $post]))
+            ->assertCreated();
+
+        $this->actingAs($user)
+            ->postJson(route('favorites.storeUser', ['user' => $userToFavorite]))
+            ->assertCreated();
+
+        $response = $this->actingAs($user)
+            ->getJson(route('favorites.index'))
+            ->assertOk();
+
+        $response->assertJsonStructure([
+            'data' => [
+                'posts' => [
+                    '*' => ['id', 'title', 'body', 'user' => ['id', 'name']]
+                ],
+                'users' => [
+                    '*' => ['id', 'name']
+                ]
+            ]
+        ]);
+    }
+
+    public function test_favorites_index_posts_include_user_data()
+    {
+        $user = User::factory()->create();
+        $postAuthor = User::factory()->create();
+        $post = Post::factory()->create(['user_id' => $postAuthor->id]);
+
+        $this->actingAs($user)
+            ->postJson(route('favorites.store', ['post' => $post]))
+            ->assertCreated();
+
+        $response = $this->actingAs($user)
+            ->getJson(route('favorites.index'))
+            ->assertOk();
+
+        $response->assertJsonPath('data.posts.0.id', $post->id)
+            ->assertJsonPath('data.posts.0.title', $post->title)
+            ->assertJsonPath('data.posts.0.body', $post->body)
+            ->assertJsonPath('data.posts.0.user.id', $postAuthor->id)
+            ->assertJsonPath('data.posts.0.user.name', $postAuthor->name);
+    }
+
+    public function test_favorites_index_users_are_listed_separately()
+    {
+        $user = User::factory()->create();
+        $userToFavorite = User::factory()->create();
+
+        $this->actingAs($user)
+            ->postJson(route('favorites.storeUser', ['user' => $userToFavorite]))
+            ->assertCreated();
+
+        $response = $this->actingAs($user)
+            ->getJson(route('favorites.index'))
+            ->assertOk();
+
+        $response->assertJsonPath('data.users.0.id', $userToFavorite->id)
+            ->assertJsonPath('data.users.0.name', $userToFavorite->name)
+            ->assertJsonCount(0, 'data.posts');
+    }
+
+    public function test_favorites_index_empty_favorites_returns_empty_arrays()
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)
+            ->getJson(route('favorites.index'))
+            ->assertOk();
+
+        $response->assertJsonPath('data.posts', [])
+            ->assertJsonPath('data.users', []);
+    }
+
+    public function test_favorites_index_mixed_favorites_are_properly_grouped()
+    {
+        $user = User::factory()->create();
+        $post1 = Post::factory()->create();
+        $post2 = Post::factory()->create();
+        $userToFavorite1 = User::factory()->create();
+        $userToFavorite2 = User::factory()->create();
+
+        $this->actingAs($user)
+            ->postJson(route('favorites.store', ['post' => $post1]))
+            ->assertCreated();
+
+        $this->actingAs($user)
+            ->postJson(route('favorites.store', ['post' => $post2]))
+            ->assertCreated();
+
+        $this->actingAs($user)
+            ->postJson(route('favorites.storeUser', ['user' => $userToFavorite1]))
+            ->assertCreated();
+
+        $this->actingAs($user)
+            ->postJson(route('favorites.storeUser', ['user' => $userToFavorite2]))
+            ->assertCreated();
+
+        $response = $this->actingAs($user)
+            ->getJson(route('favorites.index'))
+            ->assertOk();
+
+        $response->assertJsonCount(2, 'data.posts')
+            ->assertJsonCount(2, 'data.users');
+    }
 }
