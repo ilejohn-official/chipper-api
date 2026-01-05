@@ -3,9 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Post;
+use App\Models\User;
 use Illuminate\Http\Request;
-use App\Http\Requests\CreateFavoriteRequest;
 use Illuminate\Http\Response;
+use App\Enums\FavoritableType;
+use App\Http\Resources\FavoriteResource;
+use App\Http\Requests\FavoriteUserRequest;
+use App\Http\Requests\CreateFavoriteRequest;
 
 /**
  * @group Favorites
@@ -35,4 +39,27 @@ class FavoriteController extends Controller
 
         return response()->noContent();
     }
+
+    public function storeUser(FavoriteUserRequest $request, User $user)
+    {
+        $request->user()->favorites()->create([
+            'favoritable_type' => FavoritableType::USER,
+            'favoritable_id' => $user->id,
+        ]);
+
+        return response()->noContent(Response::HTTP_CREATED);
+    }
+
+    public function destroyUser(Request $request, User $user)
+    {
+        $favorite = $request->user()->favorites()
+            ->where('favoritable_type', FavoritableType::USER)
+            ->where('favoritable_id', $user->id)
+            ->firstOrFail();
+
+        $favorite->delete();
+
+        return response()->noContent();
+    }
 }
+

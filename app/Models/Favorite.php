@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\FavoritableType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,6 +13,10 @@ class Favorite extends Model
     use HasFactory;
 
     protected $fillable = ['post_id', 'user_id', 'favoritable_type', 'favoritable_id'];
+
+    protected $casts = [
+        'favoritable_type' => FavoritableType::class,
+    ];
 
     public function user(): BelongsTo
     {
