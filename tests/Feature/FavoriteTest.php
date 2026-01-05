@@ -7,12 +7,10 @@ use App\Models\Post;
 use App\Models\User;
 use App\Enums\FavoritableType;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
 
 class FavoriteTest extends TestCase
 {
     use RefreshDatabase;
-    use DatabaseMigrations;
 
     public function test_a_guest_can_not_favorite_a_post()
     {

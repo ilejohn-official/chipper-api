@@ -201,3 +201,6 @@ Congratulations! You completed the first part of this interview coding challenge
 Please go to the front-end codebase and follow the instructions you'll find on the `README`. Thank you and good luck!
 
 
+## Testing
+Create a test database: `chipper_test`
+Run tests: `php artisan test tests/Feature`
