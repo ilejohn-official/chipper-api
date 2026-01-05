@@ -210,3 +210,17 @@ To process queued jobs (notifications):
 ```bash
 php artisan queue:work
 ```
+
+## Import Users
+
+Import users from a JSON URL:
+```bash
+php artisan import:users {url} {limit}
+```
+
+**Example:**
+```bash
+php artisan import:users https://jsonplaceholder.typicode.com/users 5
+```
+
+**Note:** Imported users are assigned the default password `password`.

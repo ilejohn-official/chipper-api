@@ -48,9 +48,9 @@ class ImportUsers extends Command
         $this->info("Fetching users from {$url} (limit: {$limit})");
 
         try {
-        $response = Http::timeout(10)
-            ->retry(3, 200)
-            ->get($url);
+            $response = Http::timeout(10)
+                ->retry(3, 200)
+                ->get($url);
         } catch (ConnectionException $e) {
             $this->error('Network error while fetching users.');
             return Command::FAILURE;
@@ -90,7 +90,7 @@ class ImportUsers extends Command
             ->filter(fn ($user) => isset($user['name'], $user['email']) && filter_var($user['email'], FILTER_VALIDATE_EMAIL))
             ->each(function ($user) {
                 User::updateOrCreate(
-                    ['email' => $user['email']],
+                    ['email' => strtolower($user['email'])],
                     ['name' => $user['name'], 'password' => Hash::make('password')]
                 );
             })
