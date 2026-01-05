@@ -7,6 +7,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Http\Client\ConnectionException;
 
 class ImportUsers extends Command
 {
@@ -46,9 +47,14 @@ class ImportUsers extends Command
 
         $this->info("Fetching users from {$url} (limit: {$limit})");
 
+        try {
         $response = Http::timeout(10)
             ->retry(3, 200)
             ->get($url);
+        } catch (ConnectionException $e) {
+            $this->error('Network error while fetching users.');
+            return Command::FAILURE;
+        }
 
         if ($response->failed()) {
             $this->error('Failed to fetch user data.');
