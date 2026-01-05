@@ -128,4 +128,32 @@ class FavoriteTest extends TestCase
             ->postJson(route('favorites.storeUser', ['user' => $user]))
             ->assertForbidden();
     }
+
+    public function test_a_user_can_favorite_posts_and_users_simultaneously()
+    {
+        $user = User::factory()->create();
+        $post = Post::factory()->create();
+        $userToFavorite = User::factory()->create();
+
+        $this->actingAs($user)
+            ->postJson(route('favorites.store', ['post' => $post]))
+            ->assertCreated();
+
+        $this->actingAs($user)
+            ->postJson(route('favorites.storeUser', ['user' => $userToFavorite]))
+            ->assertCreated();
+
+        $this->assertEquals(2, $user->favorites()->count());
+
+        $this->assertDatabaseHas('favorites', [
+            'post_id' => $post->id,
+            'user_id' => $user->id,
+        ]);
+
+        $this->assertDatabaseHas('favorites', [
+            'favoritable_type' => FavoritableType::USER->value,
+            'favoritable_id' => $userToFavorite->id,
+            'user_id' => $user->id,
+        ]);
+    }
 }
