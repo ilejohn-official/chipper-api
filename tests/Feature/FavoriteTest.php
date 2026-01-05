@@ -11,7 +11,8 @@ use Illuminate\Foundation\Testing\DatabaseMigrations;
 
 class FavoriteTest extends TestCase
 {
-    use RefreshDatabase, DatabaseMigrations;
+    use RefreshDatabase;
+    use DatabaseMigrations;
 
     public function test_a_guest_can_not_favorite_a_post()
     {
