@@ -5,9 +5,10 @@ namespace App\Notifications;
 use App\Models\Post;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 
-class NewPostFromFavoriteUser extends Notification
+class NewPostFromFavoriteUser extends Notification implements ShouldQueue
 {
     use Queueable;
 

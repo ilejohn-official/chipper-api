@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\PostResource;
 use App\Models\Post;
+use App\Http\Resources\PostResource;
+use App\Jobs\NotifyFollowersOfNewPost;
 use App\Http\Requests\CreatePostRequest;
 use App\Http\Requests\UpdatePostRequest;
 use App\Http\Requests\DestroyPostRequest;
@@ -31,6 +32,8 @@ class PostController extends Controller
             'body' => $request->input('body'),
             'user_id' => $user->id,
         ]);
+
+        NotifyFollowersOfNewPost::dispatch($post);
 
         return new PostResource($post);
     }
