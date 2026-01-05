@@ -33,6 +33,11 @@ class ImportUsers extends Command
         $url = (string) $this->argument('url');
         $limit = (int) $this->argument('limit');
 
+        if (! filter_var($url, FILTER_VALIDATE_URL)) {
+            $this->error('Invalid URL provided.');
+            return Command::FAILURE;
+        }
+
         if ($limit <= 0) {
             $this->error('Limit must be greater than zero.');
             return Command::FAILURE;
@@ -50,6 +55,11 @@ class ImportUsers extends Command
         }
 
         $users = collect($response->json());
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            $this->error('Malformed JSON response.');
+            return Command::FAILURE;
+        }
 
         if (! $users->every(fn ($user) => is_array($user))) {
             $this->error('Invalid JSON structure received.');
@@ -70,7 +80,7 @@ class ImportUsers extends Command
     {
         return $users
             ->take($limit)
-            ->filter(fn ($user) => isset($user['name'], $user['email']))
+            ->filter(fn ($user) => isset($user['name'], $user['email']) && filter_var($user['email'], FILTER_VALIDATE_EMAIL))
             ->each(function ($user) {
                 User::updateOrCreate(
                     ['email' => $user['email']],
