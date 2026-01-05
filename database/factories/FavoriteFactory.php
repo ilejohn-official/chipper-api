@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Post;
 use App\Models\User;
 use App\Models\Favorite;
 use App\Enums\FavoritableType;
@@ -24,9 +25,8 @@ class FavoriteFactory extends Factory
     public function definition(): array
     {
         return [
-            'post_id' => \App\Models\Post::factory(),
-            'user_id' => \App\Models\User::factory(),
-            'favoritable_id' => fn (array $attributes) => $attributes['post_id'],
+            'user_id' => User::factory(),
+            'favoritable_id' => Post::factory(),
             'favoritable_type' => FavoritableType::POST,
         ];
     }

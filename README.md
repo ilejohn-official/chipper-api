@@ -204,3 +204,9 @@ Please go to the front-end codebase and follow the instructions you'll find on t
 ## Testing
 Create a test database: `chipper_test`
 Run tests: `php artisan test tests/Feature`
+
+## Queue Worker
+To process queued jobs (notifications):
+```bash
+php artisan queue:work
+```
