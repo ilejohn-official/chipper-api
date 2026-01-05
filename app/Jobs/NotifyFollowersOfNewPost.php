@@ -23,7 +23,7 @@ class NotifyFollowersOfNewPost implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(private Post $post)
+    public function __construct(public Post $post)
     {
         //
     }

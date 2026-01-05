@@ -3,8 +3,14 @@
 namespace Tests\Feature;
 
 use Tests\TestCase;
+use App\Models\Post;
 use App\Models\User;
 use Illuminate\Support\Arr;
+use App\Enums\FavoritableType;
+use Illuminate\Support\Facades\Queue;
+use App\Jobs\NotifyFollowersOfNewPost;
+use Illuminate\Support\Facades\Notification;
+use App\Notifications\NewPostFromFavoriteUser;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class PostTest extends TestCase
@@ -125,4 +131,42 @@ class PostTest extends TestCase
             'id' => $id,
         ]);
     }
+
+    public function test_notification_is_queued_with_correct_post_data_when_post_is_created()
+    {
+        Queue::fake();
+
+        $author = User::factory()->create();
+
+        $response = $this->actingAs($author)->postJson(route('posts.store'), [
+            'title' => 'Test Post',
+            'body' => 'This is a test post.',
+        ]);
+
+        $postId = $response->json('data.id');
+
+        Queue::assertPushed(function (NotifyFollowersOfNewPost $job) use ($postId) {
+            return $job->post->id === $postId;
+        });
+    }
+
+    public function test_job_sends_notifications_to_followers()
+    {
+        Notification::fake();
+
+        $author = User::factory()->create();
+        $follower = User::factory()->create();
+
+        $follower->favorites()->create([
+            'favoritable_type' => FavoritableType::USER,
+            'favoritable_id' => $author->id,
+        ]);
+
+        $post = Post::factory()->create(['user_id' => $author->id]);
+
+        (new NotifyFollowersOfNewPost($post))->handle();
+
+        Notification::assertSentTo($follower, NewPostFromFavoriteUser::class);
+    }
+
 }
