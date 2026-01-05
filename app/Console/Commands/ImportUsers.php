@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 
 class ImportUsers extends Command
@@ -84,7 +85,7 @@ class ImportUsers extends Command
             ->each(function ($user) {
                 User::updateOrCreate(
                     ['email' => $user['email']],
-                    ['name' => $user['name']]
+                    ['name' => $user['name'], 'password' => Hash::make('password')]
                 );
             })
             ->count();
