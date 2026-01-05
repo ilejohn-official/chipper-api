@@ -3,14 +3,15 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Favorite extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['post_id', 'user_id'];
+    protected $fillable = ['post_id', 'user_id', 'favoritable_type', 'favoritable_id'];
 
     public function user(): BelongsTo
     {
@@ -20,5 +21,10 @@ class Favorite extends Model
     public function posts(): BelongsTo
     {
         return $this->belongsTo(Post::class, 'post_id');
+    }
+
+    public function favoritable(): MorphTo
+    {
+        return $this->morphTo();
     }
 }
