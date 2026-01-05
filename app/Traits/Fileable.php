@@ -31,4 +31,14 @@ trait Fileable
         return Str::remove($storagePath . '/', $filePathInStorage);
     }
 
+    /**
+     * Retrieve file in storage.
+     *
+     * @return string The file url in storage
+     */
+    public function retrieveFile(string $fileStoragePath): ?string
+    {
+      return Storage::exists($fileStoragePath) ? Storage::url($fileStoragePath) : null;
+    }
+
 }
