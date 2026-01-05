@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Post;
+use App\Traits\Fileable;
 use App\Http\Resources\PostResource;
 use App\Jobs\NotifyFollowersOfNewPost;
 use App\Http\Requests\CreatePostRequest;
@@ -16,6 +17,8 @@ use App\Http\Requests\DestroyPostRequest;
  */
 class PostController extends Controller
 {
+    use Fileable;
+
     public function index()
     {
         $posts = Post::with('user')->orderByDesc('created_at')->get();
@@ -31,6 +34,10 @@ class PostController extends Controller
             'title' => $request->input('title'),
             'body' => $request->input('body'),
             'user_id' => $user->id,
+            'image_url' => $request->hasFile('image') ? $this->uploadFile(
+                $request->file('image'),
+                'images/posts/'.$user->id,
+            ) : null,
         ]);
 
         NotifyFollowersOfNewPost::dispatch($post);
