@@ -20,15 +20,25 @@ class FavoriteController extends Controller
 {
     public function index(Request $request)
     {
-        $favorites = $request->user()->favorites;
-        return FavoriteResource::collection($favorites);
+        $favorites = $request->user()->favorites()->get();
+
+        $postIds = $favorites->where('favoritable_type', FavoritableType::POST->value)
+            ->pluck('favoritable_id');
+        $userIds = $favorites->where('favoritable_type', FavoritableType::USER->value)
+            ->pluck('favoritable_id');
+
+        $posts = Post::with('user')->whereIn('id', $postIds)->get();
+        $users = User::whereIn('id', $userIds)->get();
+
+        return new FavoriteResource(compact('posts', 'users'));
     }
 
     public function store(CreateFavoriteRequest $request, Post $post)
     {
         $request->user()->favorites()->create([
-            'favoritable_type' => FavoritableType::POST,
+            'favoritable_type' => FavoritableType::POST->value,
             'favoritable_id' => $post->id,
+            'post_id' => $post->id
         ]);
 
         return response()->noContent(Response::HTTP_CREATED);
@@ -37,7 +47,8 @@ class FavoriteController extends Controller
     public function destroy(Request $request, Post $post)
     {
         $favorite = $request->user()->favorites()
-            ->where('favoritable_type', FavoritableType::POST)
+            ->where('post_id', $post->id)
+            ->where('favoritable_type', FavoritableType::POST->value)
             ->where('favoritable_id', $post->id)
             ->firstOrFail();
 
@@ -51,6 +62,7 @@ class FavoriteController extends Controller
         $request->user()->favorites()->create([
             'favoritable_type' => FavoritableType::USER,
             'favoritable_id' => $user->id,
+            'post_id' => 0
         ]);
 
         return response()->noContent(Response::HTTP_CREATED);
