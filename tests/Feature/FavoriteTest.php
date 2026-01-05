@@ -30,7 +30,8 @@ class FavoriteTest extends TestCase
             ->assertCreated();
 
         $this->assertDatabaseHas('favorites', [
-            'post_id' => $post->id,
+            'favoritable_type' => FavoritableType::POST->value,
+            'favoritable_id' => $post->id,
             'user_id' => $user->id,
         ]);
     }
@@ -45,7 +46,8 @@ class FavoriteTest extends TestCase
             ->assertCreated();
 
         $this->assertDatabaseHas('favorites', [
-            'post_id' => $post->id,
+            'favoritable_type' => FavoritableType::POST->value,
+            'favoritable_id' => $post->id,
             'user_id' => $user->id,
         ]);
 
@@ -54,7 +56,8 @@ class FavoriteTest extends TestCase
             ->assertNoContent();
 
         $this->assertDatabaseMissing('favorites', [
-            'post_id' => $post->id,
+            'favoritable_type' => FavoritableType::POST->value,
+            'favoritable_id' => $post->id,
             'user_id' => $user->id,
         ]);
     }
@@ -145,7 +148,8 @@ class FavoriteTest extends TestCase
         $this->assertEquals(2, $user->favorites()->count());
 
         $this->assertDatabaseHas('favorites', [
-            'post_id' => $post->id,
+            'favoritable_type' => FavoritableType::POST->value,
+            'favoritable_id' => $post->id,
             'user_id' => $user->id,
         ]);
 

@@ -12,7 +12,7 @@ class Favorite extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['post_id', 'user_id', 'favoritable_type', 'favoritable_id'];
+    protected $fillable = ['user_id', 'favoritable_type', 'favoritable_id'];
 
     protected $casts = [
         'favoritable_type' => FavoritableType::class,
