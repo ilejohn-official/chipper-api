@@ -11,7 +11,7 @@ trait Fileable
     /**
      * Upload and save file in storage.
      *
-     * @return string The stored file name with extension
+     * @return string The stored full path file name with extension
      */
     public function uploadFile(
         UploadedFile $file,
@@ -28,7 +28,7 @@ trait Fileable
             $filePathInStorage = Storage::putFile($storagePath, $file);
         }
 
-        return Str::remove($storagePath . '/', $filePathInStorage);
+        return $filePathInStorage;
     }
 
     /**
@@ -38,7 +38,7 @@ trait Fileable
      */
     public function retrieveFile(string $fileStoragePath): ?string
     {
-      return Storage::exists($fileStoragePath) ? Storage::url($fileStoragePath) : null;
+        return Storage::exists($fileStoragePath) ? Storage::url($fileStoragePath) : null;
     }
 
 }

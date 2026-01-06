@@ -7,8 +7,10 @@ use App\Models\Post;
 use App\Models\User;
 use Illuminate\Support\Arr;
 use App\Enums\FavoritableType;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Queue;
 use App\Jobs\NotifyFollowersOfNewPost;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\NewPostFromFavoriteUser;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -39,19 +41,21 @@ class PostTest extends TestCase
         $response->assertCreated()
             ->assertJsonStructure([
                 'data' => [
-                    'id', 'title', 'body',
+                    'id', 'title', 'body', 'image_url'
                 ]
             ])
             ->assertJson([
                 'data' => [
                     'title' => 'Test Post',
                     'body' => 'This is a test post.',
+                    'image_url' => null,
                 ]
             ]);
 
         $this->assertDatabaseHas('posts', [
             'title' => 'Test Post',
             'body' => 'This is a test post.',
+            'image_url' => null,
         ]);
     }
 
@@ -83,6 +87,7 @@ class PostTest extends TestCase
             'title' => 'Updated title',
             'body' => 'Updated body.',
             'id' => $id,
+            'image_url' => null
         ]);
     }
 
@@ -167,6 +172,74 @@ class PostTest extends TestCase
         (new NotifyFollowersOfNewPost($post))->handle();
 
         Notification::assertSentTo($follower, NewPostFromFavoriteUser::class);
+    }
+
+    public function test_a_user_can_create_a_post_with_valid_image()
+    {
+        Storage::fake('public');
+
+        $user = User::factory()->create();
+        $image = UploadedFile::fake()->image('post.jpg', 800, 600);
+
+        $response = $this->actingAs($user)
+            ->postJson(route('posts.store'), [
+                'title' => 'Post with Image',
+                'body' => 'This post has an image',
+                'image' => $image,
+            ])
+            ->assertCreated();
+
+        Storage::disk('public')->assertExists("images/posts/{$user->id}/" . $image->hashName());
+
+        $this->assertDatabaseHas('posts', [
+            'title' => 'Post with Image',
+            'user_id' => $user->id,
+        ]);
+
+        $response->assertJsonStructure([
+            'data' => ['id', 'title', 'body', 'image_url']
+        ]);
+    }
+
+    public function test_invalid_image_file_types_are_rejected()
+    {
+        Storage::fake('public');
+
+        $user = User::factory()->create();
+        $invalidFile = UploadedFile::fake()->create('document.pdf', 100, 'application/pdf');
+
+        $this->actingAs($user)
+            ->postJson(route('posts.store'), [
+                'title' => 'Post with Invalid File',
+                'body' => 'This should fail',
+                'image' => $invalidFile,
+            ])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['image']);
+
+        Storage::disk('public')->assertMissing("images/posts/{$user->id}/" . $invalidFile->hashName());
+    }
+
+    public function test_post_response_includes_image_url()
+    {
+        Storage::fake('public');
+
+        $user = User::factory()->create();
+        $image = UploadedFile::fake()->image('test.png', 100, 100);
+
+        $response = $this->actingAs($user)
+            ->postJson(route('posts.store'), [
+                'title' => 'Test Post',
+                'body' => 'Test body',
+                'image' => $image,
+            ])
+            ->assertCreated();
+
+        $imageUrl = $response->json('data.image_url');
+
+        $this->assertNotNull($imageUrl);
+        $this->assertStringContainsString("images/posts/{$user->id}/", $imageUrl);
+        $this->assertStringEndsWith($image->hashName(), $imageUrl);
     }
 
 }
