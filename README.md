@@ -64,7 +64,7 @@ Make sure a user can't favorite himself.
 
 > Please update the following line in this `README.md` file to include your estimate of the time required for completion.
 
-Estimated Time Required: [Your Estimate Here]
+Estimated Time Required: 2.5 hours
 
 > After updating the estimate and right before you start coding, commit your changes using the following command:
 `git add README.md && git commit -m "Task 1 estimated" && git push`
@@ -110,7 +110,7 @@ As in the previous task, please make sure to add the relevant tests in `tests/Fe
 
 > Please update the following line in this `README.md` file to include your estimate of the time required for completion.
 
-Estimated Time Required: [Your Estimate Here]
+Estimated Time Required: 1.25 hours
 
 > After updating the estimate and right before you start coding, commit your changes using the following command:
 `git add README.md && git commit -m "Task 2 estimated" && git push`
@@ -138,7 +138,7 @@ In addition to the implementation, please ensure comprehensive test coverage for
 
 > Please update the following line in this `README.md` file to include your estimate of the time required for completion.
 
-Estimated Time Required: [Your Estimate Here]
+Estimated Time Required: 1.75 hours
 
 > After updating the estimate and right before you start coding, commit your changes using the following command:
 `git add README.md && git commit -m "Task 3 estimated" && git push`
@@ -162,7 +162,7 @@ Ensure that the corresponsing tests are provided for this feature.
 
 > Please update the following line in this `README.md` file to include your estimate of the time required for completion.
 
-Estimated Time Required: [Your Estimate Here]
+Estimated Time Required: 1.25 hours
 
 > After updating the estimate and right before you start coding, commit your changes using the following command:
 `git add README.md && git commit -m "Task 4 estimated" && git push`
@@ -184,7 +184,7 @@ Once an image is attached, the endpoint should save it appropriately. The URL of
 
 > Please update the following line in this `README.md` file to include your estimate of the time required for completion.
 
-Estimated Time Required: [Your Estimate Here]
+Estimated Time Required: 1 hr 10 minutes
 
 > After updating the estimate and right before you start coding, commit your changes using the following command:
 `git add README.md && git commit -m "Extra Task estimated" && git push`
@@ -201,3 +201,40 @@ Congratulations! You completed the first part of this interview coding challenge
 Please go to the front-end codebase and follow the instructions you'll find on the `README`. Thank you and good luck!
 
 
+## Testing
+Create a test database: `chipper_test`
+Run tests: `php artisan test tests/Feature`
+
+## Queue Worker
+To process queued jobs (notifications):
+```bash
+php artisan queue:work
+```
+
+## Import Users
+
+Import users from a JSON URL:
+```bash
+php artisan import:users {url} {limit}
+```
+
+**Example:**
+```bash
+php artisan import:users https://jsonplaceholder.typicode.com/users 5
+```
+
+**Note:** Imported users are assigned the default password `password`.
+
+## Post Images
+
+Posts can include optional image attachments.
+
+**Supported Formats:** JPG, JPEG, PNG, GIF, WebP  
+**Max File Size:** 5MB
+
+**Setup:**
+
+Create the symbolic link for public storage access:
+```bash
+php artisan storage:link
+```

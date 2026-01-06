@@ -15,5 +15,7 @@ class FavoriteSeeder extends Seeder
         Favorite::factory()
             ->count(5)
             ->create();
+
+        Favorite::factory()->count(5)->forUser()->create();
     }
 }
