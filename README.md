@@ -224,3 +224,17 @@ php artisan import:users https://jsonplaceholder.typicode.com/users 5
 ```
 
 **Note:** Imported users are assigned the default password `password`.
+
+## Post Images
+
+Posts can include optional image attachments.
+
+**Supported Formats:** JPG, JPEG, PNG, GIF, WebP  
+**Max File Size:** 5MB
+
+**Setup:**
+
+Create the symbolic link for public storage access:
+```bash
+php artisan storage:link
+```
